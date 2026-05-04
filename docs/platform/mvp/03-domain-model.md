@@ -81,6 +81,8 @@ Every non-sea province has exactly one land board location.
 Every coastal province has one or more indexed coast board locations.
 Every sea province has one sea board location.
 
+All board locations belonging to the same playable province share one occupancy slot. A province may contain at most one occupying unit at a time, even when it has multiple board locations.
+
 Examples:
 - `l_spain_l`
 - `l_spain_c1`
@@ -249,7 +251,11 @@ Notes:
 - Sea province board location ids use `_s`, such as `s_mid_atlantic_ocean_s`.
 - Coast direction words such as `North Coast` or `South Coast` are display metadata, not canonical ids.
 - Board locations within the same province are related by membership in that province, not by normal movement adjacency.
-- A province has one occupancy slot across all of its board locations. For example, `l_spain_l` and `l_spain_c1` cannot both be occupied at the same time.
+- A province has one occupancy slot across all of its board locations.
+- An army at a land location and a fleet at a coast location in the same province cannot coexist.
+- For example, `l_spain_l` and `l_spain_c1` cannot both be occupied.
+- `l_spain_l` and `l_spain_c2` cannot both be occupied.
+- `l_portugal_l` and `l_portugal_c1` cannot both be occupied.
 
 ---
 
@@ -972,7 +978,7 @@ The following decisions are considered established for the platform MVP:
 - Every coastal province has one or more indexed coast board locations using `_c1`, `_c2`, `_c3`, and so on.
 - Every sea province has one sea board location using `_s`.
 - Coast direction names are display metadata, not canonical ids.
-- Each province has one occupancy slot across all of its board locations.
+- Each playable province has one occupancy slot across all of its board locations and may contain at most one occupying unit at a time.
 - Units occupy board locations, not bare provinces.
 - Units have stable identity across the game.
 - Land and fleet adjacency are separate stored graphs.
