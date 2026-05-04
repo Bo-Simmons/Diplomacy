@@ -112,7 +112,7 @@ The MVP communication model includes:
 
 Messages are phase-linked first-class entities. Message sending may also appear in event history, but messages must not be reduced to generic event rows.
 
-Structured diplomacy records, including commitments or later Agreement/Pact/Treaty concepts, are communication-layer artifacts. They are socially meaningful and queryable, but they are not mechanically binding and must not be enforced by the adjudicator.
+Structured diplomacy records, including commitments and possible future labels such as Agreement, Pact, or Treaty, are communication-layer artifacts. Their exact taxonomy remains provisional. They are socially meaningful and queryable, but they are not mechanically binding and must not be enforced by the adjudicator.
 
 ### Read Models
 

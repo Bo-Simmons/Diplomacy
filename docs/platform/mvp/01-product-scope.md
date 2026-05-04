@@ -21,7 +21,7 @@ It supports:
 - multiple seat perspectives on one machine
 - full core gameplay through standard phases
 - universal press
-- direct two-player press
+- direct two-seat press
 - non-binding structured diplomacy history later in the MVP
 - enough stable platform structure for future AI seats to plug in without platform redesign
 
@@ -85,7 +85,13 @@ MVP-C hardens the platform so future AI-controlled seats can be added without pl
 
 It includes stable seat-facing behavior, clear visibility rules, durable access to game and diplomacy history, machine-usable read models, event/replay support, and explicit platform/AI boundaries.
 
-MVP-C is complete when the platform remains fully playable by humans locally and is structurally ready to host future AI-controlled seats.
+MVP-C is complete when the platform remains fully playable by humans locally and exposes enough platform-side contract surface to host future AI-controlled seats.
+
+Platform-side readiness means the platform has:
+- a stable seat-visible state/read model
+- a legal action surface for orders and phase-appropriate seat actions
+- message and history visibility that obeys seat boundaries
+- clear phase, stage, and action lifecycle expectations
 
 ---
 
@@ -102,7 +108,8 @@ The platform MVP is complete when all of the following are true:
 - admin/testing access is explicit and separate from gameplay rules
 - current canonical state, resolved phase snapshots, and event history are preserved as distinct concepts
 - the adjudication boundary is clean and separate from messaging, UI, admin/testing access, and future AI runtime
-- future AI-controlled seats can be added through platform-defined seat-facing interfaces without redesigning the platform core
+- platform-defined seat-facing interfaces cover visible state, legal actions, message/history visibility, and phase/stage/action lifecycle expectations
+- future AI-controlled seats can later use those platform-defined interfaces without redesigning the platform core
 
 ---
 

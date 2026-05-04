@@ -29,6 +29,8 @@ The platform MVP does not include:
 - advanced trust, betrayal, reputation, or behavioral analytics
 - broad product polish beyond what local MVP usability requires
 
+This does not exclude simple recorded apparent honor/break status for structured diplomacy artifacts. The non-goal is derived scoring, reputation, or analytics built on top of that record.
+
 ---
 
 ## Deferred But Architecturally Anticipated

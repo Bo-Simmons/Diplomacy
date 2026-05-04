@@ -50,11 +50,11 @@ The canonical phase type should distinguish at least:
 The canonical phase stage should distinguish at least:
 - `open_for_input`
 - `input_locked`
-- resolving
+- `resolving`
 - `resolved_revealed`
 - `closed`
 
-Resolution/reveal is a meaningful stage of a logical phase, even if players cannot take new actions during it.
+Resolution/reveal is a meaningful stage of a logical phase, even if seats cannot take new actions during it.
 
 ### 4. Province identity is stable and separate from display text
 Province ids should be human-readable stable ids, not opaque numeric ids such as `prov2`.
@@ -249,6 +249,7 @@ Notes:
 - Sea province board location ids use `_s`, such as `s_mid_atlantic_ocean_s`.
 - Coast direction words such as `North Coast` or `South Coast` are display metadata, not canonical ids.
 - Board locations within the same province are related by membership in that province, not by normal movement adjacency.
+- A province has one occupancy slot across all of its board locations. For example, `l_spain_l` and `l_spain_c1` cannot both be occupied at the same time.
 
 ---
 
@@ -888,6 +889,7 @@ It should include:
 - A non-sea ProvinceDefinition has exactly one land BoardLocationDefinition.
 - A coastal ProvinceDefinition has one or more coast BoardLocationDefinitions.
 - A sea ProvinceDefinition has exactly one sea BoardLocationDefinition.
+- A ProvinceDefinition has one occupancy slot across all of its BoardLocationDefinitions.
 - A MapDefinition has many LandAdjacencyDefinitions.
 - A MapDefinition has many FleetAdjacencyDefinitions.
 - A MapDefinition has many StartingUnitDefinitions.
@@ -970,6 +972,7 @@ The following decisions are considered established for the platform MVP:
 - Every coastal province has one or more indexed coast board locations using `_c1`, `_c2`, `_c3`, and so on.
 - Every sea province has one sea board location using `_s`.
 - Coast direction names are display metadata, not canonical ids.
+- Each province has one occupancy slot across all of its board locations.
 - Units occupy board locations, not bare provinces.
 - Units have stable identity across the game.
 - Land and fleet adjacency are separate stored graphs.
