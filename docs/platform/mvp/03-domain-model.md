@@ -36,12 +36,25 @@ Maps exist under rulesets.
 ### 3. Phase is explicit
 The platform must model **Phase** as a first-class concept rather than relying on loose year/season strings.
 
+Phase has two distinct concepts:
+- **phase type**, which answers what kind of phase this is
+- **phase stage**, which answers where this phase is in its lifecycle
+
 The canonical phase type should distinguish at least:
 - Spring Orders
 - Spring Retreats
 - Fall Orders
 - Fall Retreats
 - Winter Adjustments
+
+The canonical phase stage should distinguish at least:
+- `open_for_input`
+- `input_locked`
+- resolving
+- `resolved_revealed`
+- `closed`
+
+Resolution/reveal is a meaningful stage of a logical phase, even if players cannot take new actions during it.
 
 ### 4. Province identity is stable and separate from display text
 Province ids should be human-readable stable ids, not opaque numeric ids such as `prov2`.
@@ -90,10 +103,13 @@ Convoy access should be derived from:
 It should not be stored as a third explicit adjacency graph.
 
 ### 8. Current state and history both matter
-The platform should preserve:
-- current canonical game state
-- resolved phase snapshots
-- event history
+The platform should maintain three distinct concepts:
+- **current canonical state**, the live operational truth for the game right now
+- **resolved phase snapshots**, frozen historical board checkpoints at stable phase boundaries
+- **event history**, an append-only chronology of what happened
+
+The current game state should not require replaying the full historical event log.
+Event history supports auditability, replay, debugging, and later AI-facing history use, but full event replay is not the primary operating model for knowing the current game state.
 
 ### 9. Orders are structured objects
 Orders should be represented internally as structured data, not plain text blobs.
@@ -376,12 +392,16 @@ Candidate fields:
 - game_id
 - year
 - phase_type
-- status
+- phase_stage
 - opened_at
 - locked_at
 - resolved_at
+- revealed_at
+- closed_at
 - previous_phase_id_optional
 - next_phase_id_optional
+
+`phase_type` answers what kind of phase this is.
 
 Where `phase_type` should be one of:
 - spring_orders
@@ -390,14 +410,49 @@ Where `phase_type` should be one of:
 - fall_retreats
 - winter_adjustments
 
+`phase_stage` answers where this phase is in its lifecycle.
+
+Where `phase_stage` should be one of:
+- open_for_input
+- input_locked
+- resolving
+- resolved_revealed
+- closed
+
 Notes:
 - This is the canonical time/state progression concept.
 - It is more precise than season/year alone.
+- `resolved_revealed` means adjudication is complete and the finalized orders/results have been revealed.
+- A phase may be `resolved_revealed` and still remain the current active phase until the next phase opens.
+- A phase becomes `closed` when the next phase is opened.
+- `closed` and `resolved_revealed` are both meaningful and should not be collapsed into one status.
+
+---
+
+### CurrentCanonicalState
+Represents the live operational truth for the game right now.
+
+This is a conceptual grouping for current runtime records such as active units, supply center control, current phase, retreat requirements, and adjustment requirements.
+
+Candidate fields:
+- game_id
+- current_phase_id
+- current_snapshot_id
+- active_unit_state
+- supply_center_control_state
+- pending_retreat_requirements
+- pending_adjustment_requirements
+- updated_at
+
+Notes:
+- The current canonical state is used to answer the present game situation directly.
+- It should coexist with resolved snapshots and event history.
+- The platform should not require replaying the full GameEvent log to know the current state.
 
 ---
 
 ### PositionSnapshot
-Represents a resolved board state at a specific phase boundary.
+Represents a frozen board checkpoint at a stable resolved/revealed phase boundary.
 
 Candidate fields:
 - snapshot_id
@@ -407,7 +462,8 @@ Candidate fields:
 - created_at
 
 Notes:
-- The platform should preserve explicit resolved snapshots per phase.
+- The platform should preserve explicit resolved snapshots at stable phase boundaries.
+- Snapshots are taken when a phase reaches `resolved_revealed`, not at every lifecycle transition such as input opening or input locking.
 - This should coexist with event history, not replace it.
 
 ---
@@ -513,6 +569,7 @@ Candidate fields:
 
 Notes:
 - A phase may contain multiple submissions over time, but only one current effective submission per seat.
+- Full finalized orders become visible at the phase's `resolved_revealed` stage.
 
 ---
 
@@ -622,6 +679,7 @@ Candidate fields:
 Notes:
 - Messages are phase-linked.
 - Messages are the origin point for tracked commitments.
+- Messages remain first-class communication objects even when message sending is also reflected in event history.
 
 ---
 
@@ -761,13 +819,14 @@ Candidate fields:
 - payload
 
 Notes:
-- This is for auditability and replay support.
+- This is for auditability, replay support, debugging, and later AI-facing history use.
 - Not every projection should be reconstructed from events, but events should still be preserved.
+- Event history should not replace first-class domain entities such as Message, OrderSubmission, Unit, or PositionSnapshot.
 
 ---
 
 ### PhaseHistoryEntry
-Represents a summarized historical record for a completed phase.
+Represents a summarized historical record for a resolved/revealed or closed phase.
 
 Candidate fields:
 - phase_history_entry_id
@@ -777,6 +836,10 @@ Candidate fields:
 - adjudication_run_id_optional
 - summary
 - created_at
+
+Notes:
+- This is a convenience history record and should not replace PositionSnapshot or GameEvent.
+- A phase can have visible resolution history while it is `resolved_revealed`, before it is later marked `closed`.
 
 ---
 
@@ -837,10 +900,14 @@ It should include:
 - A Game references one MapDefinition.
 - A Game has many Seats.
 - A Game has many Phases.
+- A Game has one current canonical state.
 - A Game has many PositionSnapshots.
 - A Game has many Units.
 - A Game has many SupplyCenterControl records.
+- A Game has many GameEvents.
 - A Unit occupies one BoardLocationDefinition at a time while active.
+- A Phase has one phase type and one phase stage.
+- A PositionSnapshot belongs to the phase boundary where it was created.
 
 ### Orders relationships
 - A Phase has many OrderDrafts.
@@ -848,6 +915,7 @@ It should include:
 - An OrderSubmission has many OrderEntries.
 - A Phase may have one or more AdjudicationRuns.
 - An AdjudicationRun has many ResolutionEntries.
+- Finalized orders for a phase become broadly visible when the phase reaches `resolved_revealed`.
 
 ### Communication relationships
 - A Game has many Channels.
@@ -886,6 +954,12 @@ The following decisions are considered established for the platform MVP:
 - Seat is the primary gameplay actor boundary.
 - Ruleset and map are separate, with map under ruleset.
 - Phase is explicit and typed.
+- Phase type and phase stage are separate concepts.
+- Phase stage includes `open_for_input`, `input_locked`, `resolving`, `resolved_revealed`, and `closed`.
+- Resolution/reveal is a meaningful stage of a logical phase.
+- A phase can be `resolved_revealed` and still remain the current active phase until the next phase opens.
+- A phase becomes `closed` when the next phase is opened.
+- Full finalized orders become visible at `resolved_revealed`.
 - Province ids are stable human-readable ids, separate from display names.
 - Province ids use `l_*` for land/coastal provinces and `s_*` for sea provinces.
 - Province type remains explicit and distinguishes at least inland, coastal, and sea.
@@ -900,10 +974,13 @@ The following decisions are considered established for the platform MVP:
 - Units have stable identity across the game.
 - Land and fleet adjacency are separate stored graphs.
 - Convoy reachability is derived, not stored as a third explicit graph.
-- Resolved board snapshots should exist per phase.
-- Event history should also exist.
+- Current canonical state, resolved phase snapshots, and event history are distinct concepts.
+- Current canonical state is the live operational truth and should not require full event replay.
+- Resolved board snapshots should exist at stable resolved/revealed phase boundaries.
+- Event history should be append-only and support auditability, replay, debugging, and later AI-facing history use.
 - Orders are structured internal objects.
 - Messages are phase-linked.
+- Messages remain first-class communication objects, not just generic event rows.
 - Commitments are made through messages and linked back to specific messages.
 - Read models are separate from core domain entities.
 
