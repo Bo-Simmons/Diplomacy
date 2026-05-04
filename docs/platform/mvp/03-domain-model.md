@@ -43,22 +43,68 @@ The canonical phase type should distinguish at least:
 - Fall Retreats
 - Winter Adjustments
 
-### 4. Current state and history both matter
+### 4. Province identity is stable and separate from display text
+Province ids should be human-readable stable ids, not opaque numeric ids such as `prov2`.
+
+The canonical id is separate from display labels. For example:
+- `l_spain` may display as `Spain`
+- `s_mid_atlantic_ocean` may display as `Mid-Atlantic Ocean`
+
+Province ids should encode coarse province kind:
+- `l_*` for land or coastal provinces
+- `s_*` for sea provinces
+
+Province type remains an explicit field. The id prefix is a readability convention, not a replacement for typed data.
+
+### 5. Province means playable province
+A **ProvinceDefinition** represents a playable province only.
+
+Named non-playable map regions, such as Switzerland or Corsica on the standard map, should not be represented as provinces. They belong in separate map data, such as **MapFeatureDefinition**.
+
+### 6. Board locations are explicit
+Units occupy board locations, not bare provinces.
+
+Every non-sea province has exactly one land board location.
+Every coastal province has one or more indexed coast board locations.
+Every sea province has one sea board location.
+
+Examples:
+- `l_spain_l`
+- `l_spain_c1`
+- `l_spain_c2`
+- `s_mid_atlantic_ocean_s`
+
+Coast direction names such as `North Coast` or `South Coast` are display metadata, not canonical ids.
+
+### 7. Movement adjacency is unit-type specific
+Land adjacency and fleet adjacency should be modeled as separate stored graphs.
+
+Board locations inside the same province are related by province membership, not by normal movement adjacency.
+
+Convoy access should be derived from:
+- province-to-location membership
+- coast locations
+- fleet adjacency
+- runtime convoying fleets
+
+It should not be stored as a third explicit adjacency graph.
+
+### 8. Current state and history both matter
 The platform should preserve:
 - current canonical game state
 - resolved phase snapshots
 - event history
 
-### 5. Orders are structured objects
+### 9. Orders are structured objects
 Orders should be represented internally as structured data, not plain text blobs.
 
-### 6. Communication is phase-linked
+### 10. Communication is phase-linked
 Messages and commitment-tracking artifacts should be associated with the phase in which they occur.
 
-### 7. Commitments are made through messages
+### 11. Commitments are made through messages
 Tracked commitments should be linked to the specific message or messages through which they were created or acknowledged.
 
-### 8. Read models are separate from core domain entities
+### 12. Read models are separate from core domain entities
 Frontend/API views should not directly expose the normalized domain model.
 
 ---
@@ -134,12 +180,14 @@ Notes:
 ---
 
 ### ProvinceDefinition
-Defines a province on a map.
+Defines a playable province on a map.
+
+This does not include named but inaccessible map regions such as Switzerland or Corsica.
 
 Candidate fields:
 - province_id
 - map_id
-- name
+- display_name
 - abbreviation
 - province_type
 - is_supply_center
@@ -150,49 +198,91 @@ Where `province_type` is one of:
 - coastal
 - sea
 
+Notes:
+- Province ids are stable human-readable ids, not opaque ids such as `prov2`.
+- Province ids and display names are separate. For example, `l_spain` may display as `Spain`.
+- Province ids use `l_*` for land/coastal provinces and `s_*` for sea provinces.
+- The id prefix does not replace `province_type`; the explicit type field remains authoritative.
+
 ---
 
 ### BoardLocationDefinition
 Defines an occupiable/targetable board location.
 
-This exists to model coasts cleanly.
+This exists so units occupy explicit board locations rather than bare provinces.
 
 Candidate fields:
 - location_id
 - map_id
 - province_id
 - location_type
-- coast_name_optional
+- display_name_optional
+- coast_index_optional
 - unit_type_restrictions
 - render_metadata
 
-Where `location_type` may include:
-- inland_location
-- sea_location
-- coastal_location
-- named_coast_location
+Where `location_type` is one of:
+- land
+- coast
+- sea
 
 Notes:
-- A province may have one or multiple board locations.
-- Fleets interact with coast-aware locations.
-- Armies may often interact at the province level, depending on the province.
+- Every inland province has exactly one land board location, such as `l_paris_l`.
+- Every coastal province has exactly one land board location and one or more indexed coast board locations.
+- Coast board location ids use `_c1`, `_c2`, `_c3`, and so on, such as `l_spain_c1` and `l_spain_c2`.
+- Sea province board location ids use `_s`, such as `s_mid_atlantic_ocean_s`.
+- Coast direction words such as `North Coast` or `South Coast` are display metadata, not canonical ids.
+- Board locations within the same province are related by membership in that province, not by normal movement adjacency.
 
 ---
 
-### AdjacencyDefinition
-Defines movement adjacency between board locations.
+### LandAdjacencyDefinition
+Defines army movement adjacency between land board locations.
 
 Candidate fields:
-- adjacency_id
+- land_adjacency_id
 - map_id
 - from_location_id
 - to_location_id
-- allowed_unit_types
-- movement_kind
 
 Notes:
-- Adjacency should be modeled as a graph, not buried informally in province metadata.
-- `movement_kind` may be useful later if the model distinguishes normal movement from special movement handling.
+- This is a stored graph for normal army movement.
+- It should not imply fleet movement or convoy reachability.
+
+---
+
+### FleetAdjacencyDefinition
+Defines fleet movement adjacency between sea and coast board locations.
+
+Candidate fields:
+- fleet_adjacency_id
+- map_id
+- from_location_id
+- to_location_id
+
+Notes:
+- This is a stored graph for normal fleet movement.
+- Coasts are explicit board locations, so fleet adjacency can point to the specific coast location.
+- Convoy reachability is derived and should not be stored as a third explicit graph.
+
+---
+
+### MapFeatureDefinition
+Defines a named non-playable feature on a map.
+
+Examples include inaccessible named regions such as Switzerland or Corsica on the standard map.
+
+Candidate fields:
+- map_feature_id
+- map_id
+- display_name
+- feature_type
+- render_metadata
+
+Notes:
+- Map features are not provinces.
+- They do not contain units, supply centers, orders, or movement adjacency.
+- They exist for rendering, labeling, and map comprehension.
 
 ---
 
@@ -338,6 +428,7 @@ Candidate fields:
 Notes:
 - Units should have stable identities across the game.
 - Stable unit ids help with debugging, history, and later AI/state reasoning.
+- `current_location_id` references a BoardLocationDefinition, not a province.
 
 ---
 
@@ -728,10 +819,18 @@ It should include:
 - A RulesetDefinition has many MapDefinitions.
 - A MapDefinition has many PowerDefinitions.
 - A MapDefinition has many ProvinceDefinitions.
+- A MapDefinition has many MapFeatureDefinitions.
 - A MapDefinition has many BoardLocationDefinitions.
-- A MapDefinition has many AdjacencyDefinitions.
+- A ProvinceDefinition has one or more BoardLocationDefinitions.
+- A non-sea ProvinceDefinition has exactly one land BoardLocationDefinition.
+- A coastal ProvinceDefinition has one or more coast BoardLocationDefinitions.
+- A sea ProvinceDefinition has exactly one sea BoardLocationDefinition.
+- A MapDefinition has many LandAdjacencyDefinitions.
+- A MapDefinition has many FleetAdjacencyDefinitions.
 - A MapDefinition has many StartingUnitDefinitions.
 - A MapDefinition has many StartingSupplyCenterControlDefinitions.
+- Board locations within the same province are related by province membership, not by normal movement adjacency.
+- Convoy reachability is derived from province/location membership, coast locations, fleet adjacency, and runtime convoying fleets.
 
 ### Runtime relationships
 - A Game references one RulesetDefinition.
@@ -741,6 +840,7 @@ It should include:
 - A Game has many PositionSnapshots.
 - A Game has many Units.
 - A Game has many SupplyCenterControl records.
+- A Unit occupies one BoardLocationDefinition at a time while active.
 
 ### Orders relationships
 - A Phase has many OrderDrafts.
@@ -786,8 +886,20 @@ The following decisions are considered established for the platform MVP:
 - Seat is the primary gameplay actor boundary.
 - Ruleset and map are separate, with map under ruleset.
 - Phase is explicit and typed.
-- Board locations must support coasts cleanly.
+- Province ids are stable human-readable ids, separate from display names.
+- Province ids use `l_*` for land/coastal provinces and `s_*` for sea provinces.
+- Province type remains explicit and distinguishes at least inland, coastal, and sea.
+- Province means playable province only.
+- Named non-playable map regions are MapFeatureDefinitions, not ProvinceDefinitions.
+- Board locations are explicit and separate from provinces.
+- Every non-sea province has exactly one land board location.
+- Every coastal province has one or more indexed coast board locations using `_c1`, `_c2`, `_c3`, and so on.
+- Every sea province has one sea board location using `_s`.
+- Coast direction names are display metadata, not canonical ids.
+- Units occupy board locations, not bare provinces.
 - Units have stable identity across the game.
+- Land and fleet adjacency are separate stored graphs.
+- Convoy reachability is derived, not stored as a third explicit graph.
 - Resolved board snapshots should exist per phase.
 - Event history should also exist.
 - Orders are structured internal objects.
@@ -801,7 +913,6 @@ The following decisions are considered established for the platform MVP:
 
 These are intentionally deferred:
 - exact commitment-tracking terminology
-- exact board-location representation style
 - exact normalized schema vs document payload tradeoffs
 - exact event taxonomy
 - exact order-entry field shape for every order type
