@@ -200,8 +200,7 @@ Detailed AI-player design belongs in future AI docs after the platform contracts
 Read this document as the repository-level architecture frame.
 
 Related docs:
-- Repository roadmap: `docs/overview/repository-roadmad.md`
-  - This is the current file name in the repository. The intended canonical path is `docs/overview/repository-roadmap.md`.
+- Repository roadmap: `docs/overview/repository-roadmap.md`
 - Platform MVP domain model: `docs/platform/mvp/03-domain-model.md`
 - Future platform MVP docs: `docs/platform/mvp/`
 - Future shared docs: `docs/shared/`
