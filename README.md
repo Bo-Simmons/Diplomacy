@@ -1,2 +1,3 @@
 # Diplomacy
-A Platform for Playing the Game Diplomacy, for now locally, with human and AI players
+
+A local-first platform for playing Diplomacy with human seats now and future AI-controlled seats later.

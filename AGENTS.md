@@ -139,11 +139,8 @@ The platform MVP is a **local-first, server-authoritative Diplomacy platform** w
 - A single developer must be able to open the same game from multiple seat perspectives on one machine.
 - The platform must support:
   - universal press
-  - direct communication between exactly two players
-  - structured diplomatic artifacts inside the communication system:
-    - Agreement
-    - Pact
-    - Treaty
+  - direct communication between exactly two seats
+  - structured diplomacy or commitment tracking inside the communication system
 - The rules are fixed to standard Diplomacy for now.
 - Map and power definitions must be designed in a data-driven, variant-ready way from the beginning.
 
@@ -156,7 +153,7 @@ The future AI subsystem is expected to:
 - interact with the platform through clean interfaces
 - operate as a seat occupant, not as a special-case game engine
 - remain model/provider agnostic
-- maintain per-player context and diplomatic memory
+- maintain per-seat context and diplomatic memory
 
 This future direction should influence present boundaries, but should not trigger premature implementation.
 
@@ -271,7 +268,7 @@ The platform must be locally runnable and locally testable first.
 
 ### 7) Structured diplomacy artifacts are communication-layer artifacts
 
-Agreement, Pact, and Treaty are part of the communication layer.
+Structured diplomacy and commitment-tracking artifacts are part of the communication layer.
 
 They are:
 - socially meaningful
@@ -296,47 +293,20 @@ The platform MVP should support:
 - **Direct press**
   - visible only to the two participating seats
 
-Structured diplomatic artifacts must be layered on top of this communication model.
+Structured diplomacy or commitment-tracking artifacts must be layered on top of this communication model.
 
-### Artifact semantics
+### Artifact terminology
 
-#### Agreement
-A lighter-weight, usually short-horizon arrangement.
-Often operational and turn-relevant.
+Exact terminology and taxonomy are intentionally provisional for the platform MVP.
 
-Examples:
-- DMZ proposal for a specific province this turn
-- temporary support promise
-- one-turn coordination plan
-
-#### Pact
-A broader private arrangement.
-Usually more complex than an Agreement and often multi-clause.
-
-Examples:
-- private non-aggression understanding
-- region-wide DMZ
-- private coordination plan across several moves
-
-#### Treaty
-A formal artifact that is published to universal press.
-
-Examples:
-- public alliance
-- public non-aggression arrangement
-- public territorial understanding
+Terms such as Agreement, Pact, and Treaty may be useful examples or future labels, but current work should not treat them as final required categories unless a later document explicitly locks that taxonomy.
 
 ### Important rule
-Agreement / Pact / Treaty must be implemented as communication-layer artifacts with lifecycle state such as:
-- proposed
-- acknowledged
-- rejected
-- countered
-- superseded
-- expired
-- broken
+Structured diplomacy and commitment-tracking artifacts must remain communication-layer artifacts.
 
-They must not be implemented as hard rules that force player orders.
+They may track proposal, acknowledgment, rejection, countering, supersession, expiration, or apparent breakage, but the final lifecycle vocabulary is intentionally open.
+
+They must not be implemented as hard rules that force seat orders.
 
 ---
 
@@ -449,6 +419,16 @@ Do not overbuild.
 
 ---
 
+## Local style guide
+
+If `.local/style-guide.md` exists in the repository root, read it before implementation work and follow it for coding-style and commenting decisions.
+
+The local style guide may contain implementation-style preferences that are intentionally kept out of the committed repository. Do not copy, summarize, or restate its hidden contents in committed repo docs.
+
+When there is no conflict with direct user requests, this `AGENTS.md`, or committed architecture docs, prefer the local style guide over default coding habits.
+
+---
+
 ## Planning expectations
 
 For complex work:
@@ -504,11 +484,14 @@ Prefer:
 - small composable modules
 - data-driven definitions where required
 - comments when architectural intent could otherwise be lost
+- readability over cleverness
+- maintainable, traditional backend style for implementation work
 - repository organization that reflects long-term subsystem boundaries
 
 Avoid:
 - hidden coupling
 - magic behavior
+- overly compressed code
 - over-abstraction for hypothetical futures
 - platform code that assumes AI internals
 - AI planning docs that quietly dictate platform implementation without explicit agreement

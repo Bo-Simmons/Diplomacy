@@ -37,24 +37,24 @@ Maps exist under rulesets.
 The platform must model **Phase** as a first-class concept rather than relying on loose year/season strings.
 
 Phase has two distinct concepts:
-- **phase type**, which answers what kind of phase this is
+- **phase kind**, which answers what kind of phase this is
 - **phase stage**, which answers where this phase is in its lifecycle
 
-The canonical phase type should distinguish at least:
-- Spring Orders
+The standard-ruleset phase kinds are:
+- Spring Movement
 - Spring Retreats
-- Fall Orders
+- Fall Movement
 - Fall Retreats
 - Winter Adjustments
 
 The canonical phase stage should distinguish at least:
 - `open_for_input`
 - `input_locked`
-- resolving
+- `resolving`
 - `resolved_revealed`
 - `closed`
 
-Resolution/reveal is a meaningful stage of a logical phase, even if players cannot take new actions during it.
+Resolution/reveal is a meaningful stage of a logical phase, even if seats cannot take new actions during it.
 
 ### 4. Province identity is stable and separate from display text
 Province ids should be human-readable stable ids, not opaque numeric ids such as `prov2`.
@@ -80,6 +80,8 @@ Units occupy board locations, not bare provinces.
 Every non-sea province has exactly one land board location.
 Every coastal province has one or more indexed coast board locations.
 Every sea province has one sea board location.
+
+All board locations belonging to the same playable province share one occupancy slot. A province may contain at most one occupying unit at a time, even when it has multiple board locations.
 
 Examples:
 - `l_spain_l`
@@ -249,6 +251,11 @@ Notes:
 - Sea province board location ids use `_s`, such as `s_mid_atlantic_ocean_s`.
 - Coast direction words such as `North Coast` or `South Coast` are display metadata, not canonical ids.
 - Board locations within the same province are related by membership in that province, not by normal movement adjacency.
+- A province has one occupancy slot across all of its board locations.
+- An army at a land location and a fleet at a coast location in the same province cannot coexist.
+- For example, `l_spain_l` and `l_spain_c1` cannot both be occupied.
+- `l_spain_l` and `l_spain_c2` cannot both be occupied.
+- `l_portugal_l` and `l_portugal_c1` cannot both be occupied.
 
 ---
 
@@ -311,6 +318,22 @@ Candidate fields:
 - power_id
 - unit_type
 - location_id
+
+---
+
+### HomeCenterDefinition
+Defines a home-center relation between a power and a supply-center province.
+
+Candidate fields:
+- home_center_id
+- map_id
+- power_id
+- province_id
+
+Notes:
+- Supply-center status is a province property.
+- Home-center status is a separate power/province relation.
+- Starting supply-center control is also separate from home-center status.
 
 ---
 
@@ -391,7 +414,7 @@ Candidate fields:
 - phase_id
 - game_id
 - year
-- phase_type
+- phase_kind
 - phase_stage
 - opened_at
 - locked_at
@@ -401,12 +424,12 @@ Candidate fields:
 - previous_phase_id_optional
 - next_phase_id_optional
 
-`phase_type` answers what kind of phase this is.
+`phase_kind` answers what kind of phase this is.
 
-Where `phase_type` should be one of:
-- spring_orders
+For the standard ruleset, `phase_kind` is one of:
+- spring_movement
 - spring_retreats
-- fall_orders
+- fall_movement
 - fall_retreats
 - winter_adjustments
 
@@ -888,8 +911,10 @@ It should include:
 - A non-sea ProvinceDefinition has exactly one land BoardLocationDefinition.
 - A coastal ProvinceDefinition has one or more coast BoardLocationDefinitions.
 - A sea ProvinceDefinition has exactly one sea BoardLocationDefinition.
+- A ProvinceDefinition has one occupancy slot across all of its BoardLocationDefinitions.
 - A MapDefinition has many LandAdjacencyDefinitions.
 - A MapDefinition has many FleetAdjacencyDefinitions.
+- A MapDefinition has many HomeCenterDefinitions.
 - A MapDefinition has many StartingUnitDefinitions.
 - A MapDefinition has many StartingSupplyCenterControlDefinitions.
 - Board locations within the same province are related by province membership, not by normal movement adjacency.
@@ -906,7 +931,7 @@ It should include:
 - A Game has many SupplyCenterControl records.
 - A Game has many GameEvents.
 - A Unit occupies one BoardLocationDefinition at a time while active.
-- A Phase has one phase type and one phase stage.
+- A Phase has one phase kind and one phase stage.
 - A PositionSnapshot belongs to the phase boundary where it was created.
 
 ### Orders relationships
@@ -954,7 +979,7 @@ The following decisions are considered established for the platform MVP:
 - Seat is the primary gameplay actor boundary.
 - Ruleset and map are separate, with map under ruleset.
 - Phase is explicit and typed.
-- Phase type and phase stage are separate concepts.
+- Phase kind and phase stage are separate concepts.
 - Phase stage includes `open_for_input`, `input_locked`, `resolving`, `resolved_revealed`, and `closed`.
 - Resolution/reveal is a meaningful stage of a logical phase.
 - A phase can be `resolved_revealed` and still remain the current active phase until the next phase opens.
@@ -970,6 +995,7 @@ The following decisions are considered established for the platform MVP:
 - Every coastal province has one or more indexed coast board locations using `_c1`, `_c2`, `_c3`, and so on.
 - Every sea province has one sea board location using `_s`.
 - Coast direction names are display metadata, not canonical ids.
+- Each playable province has one occupancy slot across all of its board locations and may contain at most one occupying unit at a time.
 - Units occupy board locations, not bare provinces.
 - Units have stable identity across the game.
 - Land and fleet adjacency are separate stored graphs.

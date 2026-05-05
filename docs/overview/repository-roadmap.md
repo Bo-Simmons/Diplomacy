@@ -115,7 +115,7 @@ Create a standard-rules Diplomacy platform that is playable locally by one perso
 
 ### Goals
 - make the game playable without deployment
-- support testing from multiple player perspectives on one machine
+- support testing from multiple seat perspectives on one machine
 - establish the server-authoritative platform core
 - support the core Diplomacy game loop before adding structured diplomacy tracking
 
@@ -132,7 +132,7 @@ Create a standard-rules Diplomacy platform that is playable locally by one perso
 - adjudication integration
 - phase advancement
 - universal press
-- direct two-player communication
+- direct two-seat communication
 
 ### Out of scope for this phase
 - AI players
@@ -156,6 +156,8 @@ Add a non-binding diplomacy-tracking layer that helps both humans and future AI 
 - support tracking of currently active understandings
 - support tracking of prior understandings and later apparent honor/break behavior
 - keep this system clearly outside adjudication
+
+This means simple recorded apparent honor/break status is in scope. Derived trust scoring, reputation systems, or behavioral analytics are out of scope for the platform MVP.
 
 ### Scope
 - structured diplomacy or commitment-tracking layer
