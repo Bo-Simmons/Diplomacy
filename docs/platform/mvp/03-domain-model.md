@@ -321,6 +321,22 @@ Candidate fields:
 
 ---
 
+### HomeCenterDefinition
+Defines a home-center relation between a power and a supply-center province.
+
+Candidate fields:
+- home_center_id
+- map_id
+- power_id
+- province_id
+
+Notes:
+- Supply-center status is a province property.
+- Home-center status is a separate power/province relation.
+- Starting supply-center control is also separate from home-center status.
+
+---
+
 ### StartingSupplyCenterControlDefinition
 Defines starting ownership/control of supply centers.
 
@@ -898,6 +914,7 @@ It should include:
 - A ProvinceDefinition has one occupancy slot across all of its BoardLocationDefinitions.
 - A MapDefinition has many LandAdjacencyDefinitions.
 - A MapDefinition has many FleetAdjacencyDefinitions.
+- A MapDefinition has many HomeCenterDefinitions.
 - A MapDefinition has many StartingUnitDefinitions.
 - A MapDefinition has many StartingSupplyCenterControlDefinitions.
 - Board locations within the same province are related by province membership, not by normal movement adjacency.
