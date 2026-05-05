@@ -419,6 +419,16 @@ Do not overbuild.
 
 ---
 
+## Local style guide
+
+If `.local/style-guide.md` exists in the repository root, read it before implementation work and follow it for coding-style and commenting decisions.
+
+The local style guide may contain implementation-style preferences that are intentionally kept out of the committed repository. Do not copy, summarize, or restate its hidden contents in committed repo docs.
+
+When there is no conflict with direct user requests, this `AGENTS.md`, or committed architecture docs, prefer the local style guide over default coding habits.
+
+---
+
 ## Planning expectations
 
 For complex work:
@@ -474,11 +484,14 @@ Prefer:
 - small composable modules
 - data-driven definitions where required
 - comments when architectural intent could otherwise be lost
+- readability over cleverness
+- maintainable, traditional backend style for implementation work
 - repository organization that reflects long-term subsystem boundaries
 
 Avoid:
 - hidden coupling
 - magic behavior
+- overly compressed code
 - over-abstraction for hypothetical futures
 - platform code that assumes AI internals
 - AI planning docs that quietly dictate platform implementation without explicit agreement

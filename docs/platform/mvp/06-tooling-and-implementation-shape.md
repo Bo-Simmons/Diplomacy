@@ -116,6 +116,21 @@ The platform should be designed to become realtime-capable.
 
 The MVP should not overbuild live collaboration infrastructure before the first playable local platform exists. Early implementation should preserve a clean path for updating seat and admin/testing views as phase, order, message, and history state changes, without forcing a premature realtime architecture.
 
+## Coding Style Direction
+
+Implementation work should follow `.local/style-guide.md` when that file exists in the repository root. That file is intentionally local-only and should not be copied into committed documentation.
+
+At a high level, platform code should favor:
+
+- readability
+- explicit naming
+- clear module boundaries
+- maintainable code over cleverness
+- comments used deliberately to clarify intent, flow, and non-obvious decisions
+- a traditional backend-engineering style rather than terse or overly smart code
+
+These preferences should guide implementation style without exposing or inventing the detailed contents of the local guide.
+
 ## Boundaries To Preserve
 
 Implementation work must preserve the already-locked platform boundaries:
