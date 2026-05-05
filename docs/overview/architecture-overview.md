@@ -145,7 +145,7 @@ The following decisions are established for the platform MVP:
 - Convoy reachability is derived, not stored as a third explicit graph.
 - Inaccessible named regions are map features, not provinces.
 - `Phase` is explicit and typed.
-- Phase type and phase stage are separate.
+- Phase kind and phase stage are separate.
 - `resolved_revealed` and `closed` are distinct phase stages.
 - Current canonical state, resolved phase snapshots, and event history are distinct.
 - Messages are first-class communication objects.

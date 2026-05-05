@@ -37,13 +37,13 @@ Maps exist under rulesets.
 The platform must model **Phase** as a first-class concept rather than relying on loose year/season strings.
 
 Phase has two distinct concepts:
-- **phase type**, which answers what kind of phase this is
+- **phase kind**, which answers what kind of phase this is
 - **phase stage**, which answers where this phase is in its lifecycle
 
-The canonical phase type should distinguish at least:
-- Spring Orders
+The standard-ruleset phase kinds are:
+- Spring Movement
 - Spring Retreats
-- Fall Orders
+- Fall Movement
 - Fall Retreats
 - Winter Adjustments
 
@@ -398,7 +398,7 @@ Candidate fields:
 - phase_id
 - game_id
 - year
-- phase_type
+- phase_kind
 - phase_stage
 - opened_at
 - locked_at
@@ -408,12 +408,12 @@ Candidate fields:
 - previous_phase_id_optional
 - next_phase_id_optional
 
-`phase_type` answers what kind of phase this is.
+`phase_kind` answers what kind of phase this is.
 
-Where `phase_type` should be one of:
-- spring_orders
+For the standard ruleset, `phase_kind` is one of:
+- spring_movement
 - spring_retreats
-- fall_orders
+- fall_movement
 - fall_retreats
 - winter_adjustments
 
@@ -914,7 +914,7 @@ It should include:
 - A Game has many SupplyCenterControl records.
 - A Game has many GameEvents.
 - A Unit occupies one BoardLocationDefinition at a time while active.
-- A Phase has one phase type and one phase stage.
+- A Phase has one phase kind and one phase stage.
 - A PositionSnapshot belongs to the phase boundary where it was created.
 
 ### Orders relationships
@@ -962,7 +962,7 @@ The following decisions are considered established for the platform MVP:
 - Seat is the primary gameplay actor boundary.
 - Ruleset and map are separate, with map under ruleset.
 - Phase is explicit and typed.
-- Phase type and phase stage are separate concepts.
+- Phase kind and phase stage are separate concepts.
 - Phase stage includes `open_for_input`, `input_locked`, `resolving`, `resolved_revealed`, and `closed`.
 - Resolution/reveal is a meaningful stage of a logical phase.
 - A phase can be `resolved_revealed` and still remain the current active phase until the next phase opens.

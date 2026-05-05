@@ -121,7 +121,7 @@ For movement phases, this means adjudication is running or being applied. For re
 
 The phase has resolved and results have been revealed.
 
-Full finalized submissions for the phase become visible at this stage according to the reveal policy. The phase may remain the current active phase while players inspect results, even though no further seat actions are accepted for that phase.
+Full finalized submissions for the phase become visible at this stage according to the reveal policy. The phase may remain the current active phase while seats inspect results, even though no further seat actions are accepted for that phase.
 
 The resolved phase snapshot is taken at this stable boundary.
 
@@ -189,6 +189,8 @@ Winter adjustment phases are not skipped from the standard cycle solely because 
 ---
 
 ## Stage Behavior By Phase Kind
+
+For the standard ruleset MVP, universal and direct press are allowed across all standard phase kinds and stages unless a later explicit game press policy says otherwise. Press visibility is still governed by channel membership.
 
 ### `spring_movement`
 

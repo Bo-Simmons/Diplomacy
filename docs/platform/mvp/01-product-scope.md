@@ -100,7 +100,7 @@ Platform-side readiness means the platform has:
 The platform MVP is complete when all of the following are true:
 
 - one human operator can run a full local standard Diplomacy game across multiple seat perspectives
-- the game loop works correctly through all standard phase types and lifecycle stages
+- the game loop works correctly through all standard phase kinds and lifecycle stages
 - order drafting, revision, submission, adjudication, retreats, adjustments, and phase advancement are supported
 - universal press and direct two-seat press work
 - structured diplomacy history exists as a non-binding communication-layer feature
